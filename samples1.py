@@ -9,10 +9,10 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch import optim
 
-toPILImage = ToPILImage()
+toPILImage = ToPILImage()  # 将ndarray或者Tensor转化成PILImage类型
 
 
-def myshow(im_data):
+def my_show(im_data):
     im = toPILImage(im_data)
     im.show()
 
@@ -25,7 +25,6 @@ transform = transforms.Compose([
 trainset = tv.datasets.CIFAR10(
     root='data/',
     train=True,
-    download=True,
     transform=transform
 )
 
@@ -39,7 +38,6 @@ trainloader = tud.DataLoader(
 testset = tv.datasets.CIFAR10(
     root='data/',
     train=False,
-    download=True,
     transform=transform
 )
 
@@ -68,7 +66,7 @@ class Net(nn.Module):
         x = x.view(-1, reduce(lambda i, j: i * j, x.size()[1:]))
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        x = self.fc3
+        x = self.fc3(x)
         return x
 
 
@@ -76,13 +74,13 @@ if __name__ == '__main__':
     # 显示一条数据
     # (data, lable) = trainset[100]
     # print(classes[lable])
-    # myshow(data)
+    # my_show(data)
 
     # 用数据加载器加载一bach数据
     # dataiter = iter(trainloader)
     # images, labels = dataiter.next()
     # print('  '.join('%11s' % classes[labels[i]] for i in range(4)))
-    # myshow(tv.utils.make_grid(images))
+    # my_show(tv.utils.make_grid(images))
 
     # 实例化网络，定义损失函数
     net = Net()
@@ -106,7 +104,7 @@ if __name__ == '__main__':
             # 更新参数
             optimizer.step()
             # 打印log信息
-            running_loss += loss.data[0]
+            running_loss += loss.item()
             if i % 2000 == 1999:  # 每2000个batch打印一次训练状态
                 print('[%d, %5d] loss: %.3f' % (epoch + 1, i + 1, running_loss / 2000))
                 running_loss = 0.0
@@ -116,7 +114,7 @@ if __name__ == '__main__':
     dataiter = iter(testloader)
     images, lables = dataiter.next()
     print('实际的label: ', ' '.join('%08s' % classes[lables[j]] for j in range(4)))
-    myshow(tv.utils.make_grid(images / 2 - 0.5).resize((400, 100)))
+    my_show(tv.utils.make_grid(images / 2 - 0.5))
     outputs = net(Variable(images))
     _, predicted = t.max(outputs.data, 1)  # 得分最高的类
     print('预测结果: ', ' '.join('%5s' % classes[predicted[j]] for j in range(4)))
